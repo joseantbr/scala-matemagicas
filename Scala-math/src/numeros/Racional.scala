@@ -1,7 +1,7 @@
 package numeros
 
-import general.Numericos._
-import general.Implicitos._
+import general.General._
+import general.Implicitos.ModInt
 
 /**
   * Clase que trabaja con números racionales.
@@ -15,7 +15,7 @@ import general.Implicitos._
   *
   * Parámetros consultables: num (numerador de la fracción simplificada), den (denominador de la fracción simplificada).
   */
-class Racional(p : Int, q : Int, skip : Boolean) {
+class Racional(p : Int, q : Int, skip : Boolean) extends Ordered[Racional] {
   require(q != 0, "ERROR: denominador igual a 0.")
 
   def this(p : Int,q : Int) = this(p,q,false)
@@ -43,6 +43,7 @@ class Racional(p : Int, q : Int, skip : Boolean) {
     case _ => false
   }
   override def hashCode(): Int = num.hashCode() + den.hashCode()
+  override def clone(): Racional = new Racional(num,den,true)
 
   def +(r : Racional) : Racional = new Racional(num*r.den + r.num*den, den*r.den)
   def +(r : Int) : Racional = new Racional(num+r*den,den,true)
@@ -59,12 +60,29 @@ class Racional(p : Int, q : Int, skip : Boolean) {
     else if(k > 0)
       new Racional(num**k,den**k)
     else
-      new Racional(den**k,num**k)
+      new Racional(den**k.abs,num**k.abs)
   }
+
+  override def compare(that: Racional): Int = (num*that.den).compareTo(that.num*den)
 }
 
-object Racional {
+object Racional extends Fractional[Racional] {
   def apply(p: Int, q: Int, skip: Boolean): Racional = new Racional(p, q, skip)
   def apply(p: Int, q: Int): Racional = new Racional(p, q)
   def apply(p: Int): Racional = new Racional(p)
+
+  override def plus(x: Racional, y: Racional): Racional = x+y
+  override def minus(x: Racional, y: Racional): Racional = x-y
+  override def times(x: Racional, y: Racional): Racional = x*y
+  override def div(x: Racional, y: Racional): Racional = x/y
+  override def negate(x: Racional): Racional = new Racional(-x.num,x.den,true)
+  override def fromInt(x: Int): Racional = new Racional(x)
+  override def toInt(x: Racional): Int = x.num / x.den
+  override def toLong(x: Racional): Long = x.num / x.den
+  override def toFloat(x: Racional): Float = x.num / x.den.toFloat
+  override def toDouble(x: Racional): Double = x.num / x.den.toDouble
+  override def compare(x: Racional, y: Racional): Int = x.compare(y)
+
+  override def one: Racional = new Racional(1)
+  override def zero: Racional = new Racional(0)
 }
